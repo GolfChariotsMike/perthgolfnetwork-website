@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eGift Card — Perth Golf Network</title>
+  <meta name="description" content="Give the gift of competitive golf with a Perth Golf Network eGift Card. Use towards membership, green fees, shop purchases and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a3a2a;
+      --green-mid: #22503a;
+      --green-light: #2d6b4c;
+      --gold: #c9a84c;
+      --gold-light: #e0c070;
+      --gold-dark: #a8873a;
+      --white: #ffffff;
+      --off-white: #f7f7f5;
+      --grey: #e8e8e4;
+      --grey-mid: #9a9a90;
+      --text: #1a1a18;
+      --text-light: #555550;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* ========== NAVBAR ========== */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 0 2rem;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+    }
+
+    .navbar.scrolled {
+      background: rgba(26, 58, 42, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+    }
+
+    .navbar:not(.scrolled) {
+      background: rgba(26, 58, 42, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-monogram {
+      width: 42px;
+      height: 42px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--green);
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .nav-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .nav-brand span {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a.active { color: var(--gold); }
+
+    .nav-cta {
+      background: var(--gold);
+      color: var(--green) !important;
+      padding: 9px 22px;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      letter-spacing: 0.5px !important;
+      text-transform: uppercase;
+      transition: background 0.2s, transform 0.15s !important;
+      white-space: nowrap;
+    }
+
+    .nav-cta:hover {
+      background: var(--gold-light) !important;
+      transform: translateY(-1px);
+      color: var(--green) !important;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px;
+      background: none;
+      border: none;
+      z-index: 1100;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--green);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 26px;
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .mobile-menu a:hover { color: var(--gold); }
+
+    .mobile-menu .mob-cta {
+      background: var(--gold);
+      color: var(--green) !important;
+      padding: 14px 40px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+    }
+
+    /* ========== HERO BANNER (400px, not full viewport) ========== */
+    .page-hero {
+      position: relative;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .page-hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1600&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center 40%;
+    }
+
+    .page-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(10,28,18,0.80) 0%, rgba(20,45,30,0.88) 50%, rgba(5,18,10,0.92) 100%);
+    }
+
+    .page-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      padding: 0 2rem;
+    }
+
+    .page-hero-badge {
+      display: inline-block;
+      background: rgba(201, 168, 76, 0.15);
+      border: 1px solid rgba(201, 168, 76, 0.4);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 7px 18px;
+      border-radius: 100px;
+      margin-bottom: 1.25rem;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+
+    .page-hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: rgba(255,255,255,0.8);
+      font-weight: 300;
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+    }
+
+    /* ========== MAIN SECTION ========== */
+    .gift-main {
+      background: var(--white);
+      padding: 5rem 2rem;
+    }
+
+    .gift-main .container {
+      max-width: 860px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    /* ========== GIFT CARD VISUAL ========== */
+    .gift-card-visual {
+      display: inline-block;
+      width: 340px;
+      height: 200px;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-mid) 60%, var(--green-light) 100%);
+      border-radius: 18px;
+      border: 2.5px solid var(--gold);
+      box-shadow: 0 8px 40px rgba(26,58,42,0.25), 0 0 0 6px rgba(201,168,76,0.12);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 3rem;
+    }
+
+    .gift-card-visual::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 160px;
+      height: 160px;
+      background: rgba(201,168,76,0.08);
+      border-radius: 50%;
+    }
+
+    .gift-card-visual::after {
+      content: '';
+      position: absolute;
+      bottom: -50px; left: -20px;
+      width: 200px;
+      height: 200px;
+      background: rgba(201,168,76,0.05);
+      border-radius: 50%;
+    }
+
+    .gift-card-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 22px 24px;
+      z-index: 1;
+    }
+
+    .gift-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .gift-card-monogram {
+      width: 36px;
+      height: 36px;
+      background: var(--gold);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--green);
+      letter-spacing: 0.5px;
+    }
+
+    .gift-card-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .gift-card-mid {
+      width: 100%;
+    }
+
+    .gift-card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.3px;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+
+    .gift-card-subtitle {
+      font-size: 10px;
+      color: var(--gold);
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .gift-card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+    }
+
+    .gift-card-border-deco {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin-bottom: 10px;
+      position: absolute;
+      bottom: 50px;
+      left: 0;
+    }
+
+    .gift-card-wa {
+      font-size: 9px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .gift-card-valid {
+      font-size: 9px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.5px;
+    }
+
+    /* ========== CONTENT ========== */
+    .gift-main h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .gift-desc {
+      font-size: 17px;
+      color: var(--text-light);
+      line-height: 1.75;
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* ========== AMOUNT BUTTONS ========== */
+    .amount-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .amount-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .amount-btn {
+      border: 2px solid var(--gold);
+      color: var(--green);
+      background: transparent;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+      letter-spacing: 0.3px;
+    }
+
+    .amount-btn:hover,
+    .amount-btn.active {
+      background: var(--gold);
+      color: var(--green);
+      transform: translateY(-2px);
+    }
+
+    .btn-gold {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--green);
+      padding: 16px 48px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-gold:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.4);
+    }
+
+    .gift-note {
+      font-size: 13px;
+      color: var(--grey-mid);
+      letter-spacing: 0.2px;
+      margin-top: 0.25rem;
+    }
+
+    /* ========== WHY SECTION ========== */
+    .why-section {
+      background: var(--off-white);
+      padding: 5rem 2rem;
+    }
+
+    .why-section .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .why-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1.2;
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .why-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2.25rem 1.75rem;
+      border: 1px solid var(--grey);
+      text-align: center;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .why-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+
+    .why-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 40px rgba(26,58,42,0.1);
+      border-color: transparent;
+    }
+
+    .why-card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .why-icon {
+      font-size: 2.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .why-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 0.6rem;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .why-card p {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.65;
+    }
+
+    /* ========== FOOTER ========== */
+    footer {
+      background: #0f2218;
+      color: rgba(255,255,255,0.7);
+      padding: 4rem 2rem 2rem;
+    }
+
+    .footer-top {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 3rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 2rem;
+    }
+
+    .footer-brand .nav-brand {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .footer-tagline {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-contact a {
+      display: block;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 13.5px;
+      margin-bottom: 0.4rem;
+      transition: color 0.2s;
+    }
+
+    .footer-contact a:hover { color: var(--gold); }
+
+    .social-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .social-link {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .social-link:hover {
+      background: rgba(201,168,76,0.15);
+      border-color: var(--gold);
+    }
+
+    .social-link svg {
+      width: 17px;
+      height: 17px;
+      fill: rgba(255,255,255,0.7);
+    }
+
+    .footer-links h4 {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 13.5px;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-bottom {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer-copy {
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .footer-pgn-badge {
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.5px;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 900px) {
+      .why-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .footer-top > div:first-child { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .why-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      .gift-card-visual { width: 290px; height: 175px; }
+      .amount-buttons { gap: 0.5rem; }
+      .amount-btn { padding: 9px 16px; font-size: 14px; }
+    }
+
+    /* ========== ANIMATIONS ========== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-delay-1 { transition-delay: 0.1s; }
+    .fade-in-delay-2 { transition-delay: 0.2s; }
+    .fade-in-delay-3 { transition-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-monogram">PGN</div>
+      <div class="nav-brand">
+        Perth Golf Network
+        <span>Western Australia</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="about-us.html">About</a></li>
+      <li><a href="daily-competitions.html">Daily Comps</a></li>
+      <li><a href="special-events.html">Special Events</a></li>
+      <li><a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a></li>
+      <li><a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" class="nav-cta" target="_blank" rel="noopener">Join Now</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about-us.html">About</a>
+    <a href="daily-competitions.html">Daily Comps</a>
+    <a href="special-events.html">Special Events</a>
+    <a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a>
+    <a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" class="mob-cta" target="_blank" rel="noopener">Join Now</a>
+  </div>
+
+  <!-- HERO BANNER -->
+  <section class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <div class="page-hero-badge">Perth Golf Network</div>
+      <h1>PGN eGift Card</h1>
+      <p class="page-hero-sub">Give the Gift of Golf</p>
+    </div>
+  </section>
+
+  <!-- MAIN GIFT CARD SECTION -->
+  <section class="gift-main">
+    <div class="container">
+
+      <!-- Gift Card Visual -->
+      <div class="fade-in">
+        <div class="gift-card-visual">
+          <div class="gift-card-inner">
+            <div class="gift-card-top">
+              <div class="gift-card-monogram">PGN</div>
+              <div class="gift-card-icon">⛳</div>
+            </div>
+            <div class="gift-card-mid">
+              <div class="gift-card-name">Perth Golf Network</div>
+              <div class="gift-card-subtitle">eGift Card</div>
+            </div>
+            <div class="gift-card-bottom">
+              <div class="gift-card-wa">Western Australia</div>
+              <div class="gift-card-valid">WA's #1 Social Golf Club</div>
+            </div>
+          </div>
+          <div class="gift-card-border-deco"></div>
+        </div>
+      </div>
+
+      <!-- Heading & Description -->
+      <div class="fade-in fade-in-delay-1">
+        <h2>Perth Golf Network eGift Card</h2>
+        <p class="gift-desc">Give someone the gift of competitive golf. PGN eGift Cards can be used towards membership, competition green fees, shop purchases, and more.</p>
+      </div>
+
+      <!-- Amount Buttons -->
+      <div class="fade-in fade-in-delay-2">
+        <p class="amount-label">Select an amount</p>
+        <div class="amount-buttons">
+          <button class="amount-btn" onclick="selectAmount(this)">$25</button>
+          <button class="amount-btn active" onclick="selectAmount(this)">$50</button>
+          <button class="amount-btn" onclick="selectAmount(this)">$100</button>
+          <button class="amount-btn" onclick="selectAmount(this)">$150</button>
+          <button class="amount-btn" onclick="selectAmount(this)">$200</button>
+          <button class="amount-btn" onclick="selectAmount(this)">Custom</button>
+        </div>
+
+        <!-- Buy Now Button -->
+        <a href="https://www.perthgolfnetwork.com.au/gift-card" class="btn-gold" target="_blank" rel="noopener">Buy Now</a>
+
+        <!-- Note -->
+        <p class="gift-note">Gift cards are delivered electronically to the recipient's email address.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- WHY GIVE A PGN GIFT CARD -->
+  <section class="why-section">
+    <div class="container">
+      <div class="why-header fade-in">
+        <span class="section-tag">Why Give a PGN Gift Card</span>
+        <h2 class="section-title">The Perfect Golf Gift</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-card fade-in">
+          <div class="why-icon">🎯</div>
+          <h3>Flexible</h3>
+          <p>Use towards membership, green fees, or shop merchandise. The recipient chooses how they spend it.</p>
+        </div>
+        <div class="why-card fade-in fade-in-delay-1">
+          <div class="why-icon">📧</div>
+          <h3>Instant Delivery</h3>
+          <p>Delivered by email instantly, no waiting. Perfect even when you've left it to the last minute.</p>
+        </div>
+        <div class="why-card fade-in fade-in-delay-2">
+          <div class="why-icon">⛳</div>
+          <h3>Perfect Golf Gift</h3>
+          <p>Ideal for birthdays, Father's Day, Christmas or any occasion. A gift any golfer will love.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="display: inline-flex; margin-bottom: 1rem;">
+          <div class="nav-monogram">PGN</div>
+          <div class="nav-brand" style="font-size: 1.1rem;">Perth Golf Network</div>
+        </a>
+        <p class="footer-tagline">WA's Biggest &amp; Best Social Golf Club</p>
+        <div class="footer-contact">
+          <a href="mailto:info@perthgolfnetwork.com.au">info@perthgolfnetwork.com.au</a>
+          <a href="tel:0862855822">(08) 6285 5822</a>
+        </div>
+        <div class="social-links">
+          <a href="https://www.facebook.com/perthgolfnetwork" class="social-link" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/perthgolfnetwork" class="social-link" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="about-us.html">About Us</a></li>
+          <li><a href="daily-competitions.html">Daily Comps</a></li>
+          <li><a href="special-events.html">Special Events</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="gift-card.html">Gift Card</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Members</h4>
+        <ul>
+          <li><a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a></li>
+          <li><a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" target="_blank" rel="noopener">Join Now</a></li>
+          <li><a href="https://www.perthgolfnetwork.com.au/membership-renewal" target="_blank" rel="noopener">Renew Membership</a></li>
+          <li><a href="https://perthgolfnetwork.miclub.com.au/views/members/booking/eventList.xhtml?" target="_blank" rel="noopener">Book a Comp</a></li>
+          <li><a href="http://eepurl.com/iQC68M" target="_blank" rel="noopener">Newsletter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 Perth Golf Network. All rights reserved.</p>
+      <p class="footer-pgn-badge">ABN · WA's #1 Social Golf Club</p>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 60) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+
+    // Close mobile menu on link click
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // Amount button selection
+    function selectAmount(btn) {
+      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Intersection Observer for fade-in animations
+    const fadeEls = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    fadeEls.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

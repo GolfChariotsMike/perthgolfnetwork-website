@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Special Events — Perth Golf Network</title>
+  <meta name="description" content="Over 50 special events per year at WA's most prestigious courses — Lake Karrinyup CC, Royal Perth, Royal Fremantle, Mount Lawley and more. $75,000 in prizes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a3a2a;
+      --green-mid: #22503a;
+      --green-light: #2d6b4c;
+      --gold: #c9a84c;
+      --gold-light: #e0c070;
+      --gold-dark: #a8873a;
+      --white: #ffffff;
+      --off-white: #f7f7f5;
+      --grey: #e8e8e4;
+      --grey-mid: #9a9a90;
+      --text: #1a1a18;
+      --text-light: #555550;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text); background: var(--white); overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+
+    /* ========== NAVBAR ========== */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 0 2rem; height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(26, 58, 42, 0.96);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+
+    .nav-monogram {
+      width: 42px; height: 42px; background: var(--gold); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-weight: 700; font-size: 14px;
+      color: var(--green); letter-spacing: 0.5px; flex-shrink: 0;
+    }
+
+    .nav-brand {
+      font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700;
+      color: var(--white); line-height: 1.2;
+    }
+
+    .nav-brand span {
+      display: block; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 400;
+      color: rgba(255,255,255,0.65); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px;
+      font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a.active { color: var(--gold); }
+
+    .nav-cta {
+      background: var(--gold); color: var(--green) !important;
+      padding: 9px 22px; border-radius: 6px;
+      font-weight: 700 !important; font-size: 13px !important;
+      letter-spacing: 0.5px !important; text-transform: uppercase;
+      transition: background 0.2s, transform 0.15s !important; white-space: nowrap;
+    }
+
+    .nav-cta:hover { background: var(--gold-light) !important; transform: translateY(-1px); color: var(--green) !important; }
+
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      padding: 6px; background: none; border: none; z-index: 1100;
+    }
+
+    .hamburger span {
+      display: block; width: 24px; height: 2px; background: var(--white);
+      border-radius: 2px; transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--green); z-index: 999;
+      flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+    }
+
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { color: var(--white); text-decoration: none; font-size: 26px; font-family: 'Playfair Display', serif; font-weight: 600; transition: color 0.2s; }
+    .mobile-menu a:hover { color: var(--gold); }
+    .mobile-menu .mob-cta { background: var(--gold); color: var(--green) !important; padding: 14px 40px; border-radius: 8px; font-family: 'Inter', sans-serif !important; font-size: 16px !important; font-weight: 700 !important; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 0.5rem; }
+
+    /* ========== PAGE HERO ========== */
+    .page-hero {
+      position: relative; height: 400px;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; overflow: hidden; margin-top: 72px;
+    }
+
+    .page-hero-bg {
+      position: absolute; inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=1600&auto=format&fit=crop');
+      background-size: cover; background-position: center 40%;
+    }
+
+    .page-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(160deg, rgba(10,28,18,0.8) 0%, rgba(20,45,30,0.9) 100%);
+    }
+
+    .page-hero-content { position: relative; z-index: 2; padding: 0 2rem; }
+
+    .page-hero-badge {
+      display: inline-block; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4);
+      color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase;
+      padding: 7px 18px; border-radius: 100px; margin-bottom: 1.25rem;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2rem, 4.5vw, 3.5rem); font-weight: 900; color: var(--white);
+      line-height: 1.15; margin-bottom: 0.75rem; text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+
+    .page-hero-sub { font-size: clamp(1rem, 2vw, 1.2rem); color: rgba(255,255,255,0.8); font-weight: 300; letter-spacing: 0.5px; }
+
+    /* ========== COMMONS ========== */
+    section { padding: 5rem 2rem; }
+    .section-tag { display: inline-block; color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .section-title { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--green); line-height: 1.2; margin-bottom: 1rem; }
+    .section-title.light { color: var(--white); }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ========== INTRO ========== */
+    .intro-section { background: var(--white); padding: 4rem 2rem; }
+    .intro-inner { max-width: 800px; margin: 0 auto; text-align: center; }
+    .intro-inner p { font-size: 17px; color: var(--text-light); line-height: 1.8; }
+
+    /* ========== COURSE HIGHLIGHTS ========== */
+    .courses-section { background: var(--off-white); }
+    .courses-header { text-align: center; margin-bottom: 3rem; }
+    .courses-header .section-sub { max-width: 560px; margin: 0 auto; font-size: 17px; color: var(--text-light); line-height: 1.7; }
+
+    .courses-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+    }
+
+    .course-card {
+      background: var(--white); border-radius: 16px; padding: 2rem 1.75rem;
+      border: 1px solid var(--grey); position: relative; overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .course-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(26,58,42,0.1); }
+
+    .course-card-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .course-icon { font-size: 2rem; }
+
+    .premium-badge {
+      background: var(--gold); color: var(--green);
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
+    }
+
+    .course-card h3 {
+      font-size: 1.1rem; font-weight: 700; color: var(--green);
+      line-height: 1.3;
+    }
+
+    .course-card p {
+      font-size: 13.5px; color: var(--text-light); margin-top: 0.5rem; line-height: 1.5;
+    }
+
+    /* ========== HOW IT WORKS ========== */
+    .how-section { background: var(--white); }
+    .how-header { text-align: center; margin-bottom: 3rem; }
+
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+      max-width: 900px; margin: 0 auto;
+    }
+
+    .step-card {
+      text-align: center; padding: 2.5rem 1.5rem;
+      background: var(--off-white); border-radius: 16px; border: 1px solid var(--grey);
+    }
+
+    .step-num {
+      width: 52px; height: 52px; background: var(--gold); color: var(--green);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700;
+      margin: 0 auto 1.25rem;
+    }
+
+    .step-card h3 { font-size: 1.15rem; color: var(--green); margin-bottom: 0.6rem; }
+    .step-card p { font-size: 14px; color: var(--text-light); line-height: 1.65; }
+
+    /* ========== PRIZE INFO ========== */
+    .prize-section {
+      background: var(--green); padding: 5rem 2rem;
+      position: relative; overflow: hidden;
+    }
+
+    .prize-section::before {
+      content: ''; position: absolute; top: -100px; right: -100px;
+      width: 500px; height: 500px; background: rgba(201,168,76,0.05); border-radius: 50%;
+    }
+
+    .prize-section::after {
+      content: ''; position: absolute; bottom: -80px; left: -60px;
+      width: 400px; height: 400px; background: rgba(201,168,76,0.04); border-radius: 50%;
+    }
+
+    .prize-inner { max-width: 760px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+
+    .prize-inner .section-tag { letter-spacing: 2.5px; }
+
+    .prize-inner h2 { font-size: clamp(2rem, 4vw, 3rem); color: var(--white); margin-bottom: 1.25rem; }
+
+    .prize-inner p { font-size: 17px; color: rgba(255,255,255,0.75); line-height: 1.8; margin-bottom: 2.5rem; }
+
+    .prize-stats {
+      display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem;
+    }
+
+    .prize-stat {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 14px; padding: 1.5rem 2rem; text-align: center;
+    }
+
+    .prize-stat-num {
+      font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700;
+      color: var(--gold); line-height: 1; margin-bottom: 0.4rem;
+    }
+
+    .prize-stat-label { font-size: 13px; color: rgba(255,255,255,0.7); }
+
+    /* ========== NEWSLETTER CTA ========== */
+    .newsletter-section { background: var(--off-white); padding: 5rem 2rem; text-align: center; }
+
+    .newsletter-inner { max-width: 600px; margin: 0 auto; }
+    .newsletter-inner h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); color: var(--green); margin-bottom: 0.75rem; }
+    .newsletter-inner p { font-size: 16px; color: var(--text-light); margin-bottom: 2rem; line-height: 1.7; }
+
+    .btn-gold {
+      display: inline-block; background: var(--gold); color: var(--green);
+      padding: 15px 36px; border-radius: 8px; font-weight: 700; font-size: 15px;
+      text-decoration: none; letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+    }
+
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.4); }
+
+    /* ========== FOOTER ========== */
+    footer { background: #0f2218; color: rgba(255,255,255,0.7); padding: 4rem 2rem 2rem; }
+
+    .footer-top {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 3rem; padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 2rem;
+    }
+
+    .footer-brand .nav-brand { font-size: 1.3rem; margin-bottom: 0.5rem; display: block; }
+    .footer-tagline { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 1.25rem; letter-spacing: 0.5px; }
+
+    .footer-contact a { display: block; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; margin-bottom: 0.4rem; transition: color 0.2s; }
+    .footer-contact a:hover { color: var(--gold); }
+
+    .social-links { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+
+    .social-link {
+      width: 38px; height: 38px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; transition: background 0.2s, border-color 0.2s;
+    }
+
+    .social-link:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+    .social-link svg { width: 17px; height: 17px; fill: rgba(255,255,255,0.7); }
+
+    .footer-links h4 { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+    .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-bottom { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    .footer-copy { font-size: 12.5px; color: rgba(255,255,255,0.35); }
+    .footer-pgn-badge { font-size: 12px; color: rgba(255,255,255,0.25); letter-spacing: 0.5px; }
+
+    /* ========== ANIMATIONS ========== */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    .fade-in-delay-1 { transition-delay: 0.1s; }
+    .fade-in-delay-2 { transition-delay: 0.2s; }
+    .fade-in-delay-3 { transition-delay: 0.3s; }
+    .fade-in-delay-4 { transition-delay: 0.4s; }
+    .fade-in-delay-5 { transition-delay: 0.5s; }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 900px) {
+      .courses-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: 1fr; max-width: 420px; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .footer-top > div:first-child { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .courses-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      section { padding: 3.5rem 1.25rem; }
+      .page-hero { height: 320px; }
+      .prize-stats { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-monogram">PGN</div>
+      <div class="nav-brand">
+        Perth Golf Network
+        <span>Western Australia</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="about-us.html">About</a></li>
+      <li><a href="daily-competitions.html">Daily Comps</a></li>
+      <li><a href="special-events.html" class="active">Special Events</a></li>
+      <li><a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a></li>
+      <li><a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" class="nav-cta" target="_blank" rel="noopener">Join Now</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about-us.html">About</a>
+    <a href="daily-competitions.html">Daily Comps</a>
+    <a href="special-events.html">Special Events</a>
+    <a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a>
+    <a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" class="mob-cta" target="_blank" rel="noopener">Join Now</a>
+  </div>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <div class="page-hero-badge">50+ Events Per Year</div>
+      <h1>Special Events</h1>
+      <p class="page-hero-sub">Play WA's Most Prestigious Courses</p>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <section class="intro-section">
+    <div class="intro-inner fade-in">
+      <span class="section-tag">Exclusive Access</span>
+      <h2 class="section-title" style="margin-bottom: 1.25rem;">Bucket-List Rounds<br/>at Member Prices</h2>
+      <p>Over 50 special events per year giving members the chance to play at WA's most exclusive courses. From championship layouts to historic private clubs — these are the rounds you'll be talking about for years, at member-friendly prices.</p>
+    </div>
+  </section>
+
+  <!-- COURSE HIGHLIGHTS -->
+  <section class="courses-section">
+    <div class="container">
+      <div class="courses-header fade-in">
+        <span class="section-tag">Premier Venues</span>
+        <h2 class="section-title">WA's Most Coveted Courses</h2>
+        <p class="section-sub">PGN members gain access to courses that are otherwise closed to the public — truly once-in-a-lifetime rounds at an affordable price.</p>
+      </div>
+      <div class="courses-grid">
+        <div class="course-card fade-in">
+          <div class="course-card-top">
+            <div class="course-icon">⛳</div>
+            <span class="premium-badge">Premium</span>
+          </div>
+          <h3>Lake Karrinyup Country Club</h3>
+          <p>One of Australia's finest private golf clubs — a stunning championship layout that rarely opens its doors to non-members.</p>
+        </div>
+        <div class="course-card fade-in fade-in-delay-1">
+          <div class="course-card-top">
+            <div class="course-icon">⛳</div>
+            <span class="premium-badge">Premium</span>
+          </div>
+          <h3>Mount Lawley Golf Club</h3>
+          <p>A classic parkland layout in the heart of Perth — known for its pristine conditioning and rich history in WA golf.</p>
+        </div>
+        <div class="course-card fade-in fade-in-delay-2">
+          <div class="course-card-top">
+            <div class="course-icon">⛳</div>
+            <span class="premium-badge">Premium</span>
+          </div>
+          <h3>Royal Fremantle Golf Club</h3>
+          <p>A Royal-chartered club with a remarkable links-style layout overlooking the Swan River — a truly special venue.</p>
+        </div>
+        <div class="course-card fade-in fade-in-delay-3">
+          <div class="course-card-top">
+            <div class="course-icon">⛳</div>
+            <span class="premium-badge">Premium</span>
+          </div>
+          <h3>Royal Perth Golf Club</h3>
+          <p>WA's most prestigious Royal club — an iconic course steeped in tradition and challenging enough to test every level of player.</p>
+        </div>
+        <div class="course-card fade-in fade-in-delay-4">
+          <div class="course-card-top">
+            <div class="course-icon">⛳</div>
+            <span class="premium-badge">Premium</span>
+          </div>
+          <h3>The Western Australian Golf Club</h3>
+          <p>One of WA's great private golf clubs offering a challenging, mature course in a prestigious setting south of Perth.</p>
+        </div>
+        <div class="course-card fade-in fade-in-delay-5">
+          <div class="course-card-top">
+            <div class="course-icon">🏆</div>
+            <span class="premium-badge">+ More</span>
+          </div>
+          <h3>Many More Exclusive Venues</h3>
+          <p>New special events are announced every week. Subscribe to the PGN newsletter to be the first to know about upcoming events.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="container">
+      <div class="how-header fade-in">
+        <span class="section-tag">How It Works</span>
+        <h2 class="section-title">How Special Events Work</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card fade-in">
+          <div class="step-num">1</div>
+          <h3>Stay in the Loop</h3>
+          <p>Events are announced via the weekly PGN newsletter and through the Members Area portal. Subscribe so you never miss out.</p>
+        </div>
+        <div class="step-card fade-in fade-in-delay-1">
+          <div class="step-num">2</div>
+          <h3>Book Fast</h3>
+          <p>Book online through the Members Area portal. Spots fill extremely fast — be ready when the event goes live. Green fee + comp fee paid at booking.</p>
+        </div>
+        <div class="step-card fade-in fade-in-delay-2">
+          <div class="step-num">3</div>
+          <h3>Play &amp; Win</h3>
+          <p>Show up, play a bucket-list course alongside fellow PGN members, and compete for a share of $75,000 in annual special event and tour prizes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIZE SECTION -->
+  <section class="prize-section">
+    <div class="prize-inner fade-in">
+      <span class="section-tag">Prize Pool</span>
+      <h2>Big Events. Bigger Prizes.</h2>
+      <p>PGN runs 50+ special events and 4 annual tours each year, with serious prize money at stake. This is competitive golf at Perth's best venues, at prices that don't break the bank.</p>
+      <div class="prize-stats">
+        <div class="prize-stat">
+          <div class="prize-stat-num">$75,000</div>
+          <div class="prize-stat-label">Special event &amp; tour prizes</div>
+        </div>
+        <div class="prize-stat">
+          <div class="prize-stat-num">50+</div>
+          <div class="prize-stat-label">Events per year</div>
+        </div>
+        <div class="prize-stat">
+          <div class="prize-stat-num">4</div>
+          <div class="prize-stat-label">Annual tours</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER CTA -->
+  <section class="newsletter-section">
+    <div class="newsletter-inner fade-in">
+      <span class="section-tag">Newsletter</span>
+      <h2>Be the First to Know</h2>
+      <p>Special event spots sell out fast. Subscribe to the PGN newsletter and get upcoming events straight to your inbox before they fill up.</p>
+      <a href="http://eepurl.com/iQC68M" class="btn-gold" target="_blank" rel="noopener">Subscribe to Newsletter</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="display: inline-flex; margin-bottom: 1rem;">
+          <div class="nav-monogram">PGN</div>
+          <div class="nav-brand" style="font-size: 1.1rem;">Perth Golf Network</div>
+        </a>
+        <p class="footer-tagline">WA's Biggest &amp; Best Social Golf Club</p>
+        <div class="footer-contact">
+          <a href="mailto:info@perthgolfnetwork.com.au">info@perthgolfnetwork.com.au</a>
+          <a href="tel:0862855822">(08) 6285 5822</a>
+        </div>
+        <div class="social-links">
+          <a href="https://www.facebook.com/perthgolfnetwork" class="social-link" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/perthgolfnetwork" class="social-link" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="about-us.html">About Us</a></li>
+          <li><a href="daily-competitions.html">Daily Comps</a></li>
+          <li><a href="special-events.html">Special Events</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="gift-card.html">Gift Card</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Members</h4>
+        <ul>
+          <li><a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a></li>
+          <li><a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" target="_blank" rel="noopener">Join Now</a></li>
+          <li><a href="https://www.perthgolfnetwork.com.au/membership-renewal" target="_blank" rel="noopener">Renew Membership</a></li>
+          <li><a href="https://perthgolfnetwork.miclub.com.au/views/members/booking/eventList.xhtml?" target="_blank" rel="noopener">Book a Comp</a></li>
+          <li><a href="http://eepurl.com/iQC68M" target="_blank" rel="noopener">Newsletter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 Perth Golf Network. All rights reserved.</p>
+      <p class="footer-pgn-badge">ABN · WA's #1 Social Golf Club</p>
+    </div>
+  </footer>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    const fadeEls = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    fadeEls.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
