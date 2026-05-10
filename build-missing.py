@@ -1,0 +1,570 @@
+#!/usr/bin/env python3
+"""Build missing PGN pages and update navs on existing pages."""
+import os, re
+
+DIR = "/data/.openclaw/workspace/projects/perthgolfnetwork"
+
+# ─── Shared snippets ───────────────────────────────────────────────────────────
+FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com" />\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />\n  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700;900&display=swap" rel="stylesheet" />'
+
+BASE_CSS = """
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1a3a2a; --green-mid: #22503a; --green-light: #2d6b4c;
+      --gold: #c9a84c; --gold-light: #e0c070; --gold-dark: #a8873a;
+      --white: #ffffff; --off-white: #f7f7f5; --grey: #e8e8e4;
+      --grey-mid: #9a9a90; --text: #1a1a18; --text-light: #555550;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--white); overflow-x: hidden; }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 0 2rem; height: 72px; display: flex; align-items: center;
+      justify-content: space-between; transition: background 0.3s, box-shadow 0.3s;
+    }
+    .navbar.scrolled { background: rgba(26,58,42,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 2px 20px rgba(0,0,0,0.25); }
+    .navbar:not(.scrolled) { background: transparent; }
+    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-monogram { width: 42px; height: 42px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 14px; color: var(--green); letter-spacing: 0.5px; flex-shrink: 0; }
+    .nav-brand { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--white); line-height: 1.2; }
+    .nav-brand span { display: block; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.65); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta { background: var(--gold); color: var(--green) !important; padding: 9px 22px; border-radius: 6px; font-weight: 700 !important; font-size: 13px !important; letter-spacing: 0.5px !important; text-transform: uppercase; transition: background 0.2s, transform 0.15s !important; white-space: nowrap; }
+    .nav-cta:hover { background: var(--gold-light) !important; transform: translateY(-1px); }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-toggle { display: flex !important; align-items: center; gap: 5px; cursor: pointer; }
+    .nav-dropdown-toggle::after { content: '▾'; font-size: 10px; }
+    .nav-dropdown-menu { position: absolute; top: calc(100% + 12px); right: 0; background: rgba(20,50,35,0.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(201,168,76,0.25); border-radius: 10px; min-width: 210px; list-style: none; padding: 0.5rem 0; opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; z-index: 200; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown:focus-within .nav-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+    .nav-dropdown-menu li { padding: 0; }
+    .nav-dropdown-menu a { display: block !important; padding: 9px 18px !important; font-size: 13px !important; color: rgba(255,255,255,0.82) !important; letter-spacing: 0.2px !important; border-bottom: 1px solid rgba(255,255,255,0.04) !important; transition: background 0.15s, color 0.15s !important; }
+    .nav-dropdown-menu li:last-child a { border-bottom: none !important; }
+    .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.12) !important; color: var(--gold) !important; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; background: none; border: none; z-index: 1100; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--white); border-radius: 2px; transition: transform 0.3s, opacity 0.3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--green); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; overflow-y: auto; padding: 2rem; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { color: var(--white); text-decoration: none; font-size: 20px; font-family: 'Playfair Display', serif; font-weight: 600; transition: color 0.2s; }
+    .mobile-menu a:hover { color: var(--gold); }
+    .mob-cta { background: var(--gold); color: var(--green) !important; padding: 14px 40px; border-radius: 8px; font-family: 'Inter', sans-serif !important; font-size: 16px !important; font-weight: 700 !important; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 0.5rem; }
+    .page-hero { position: relative; height: 55vh; min-height: 380px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+    .page-hero-bg { position: absolute; inset: 0; background-image: url('https://static.wixstatic.com/media/b4d0d3_0fa7c0a3edea4d32b69fb7410480532a~mv2.jpg/v1/fit/w_1600,h_800,q_90/b4d0d3_0fa7c0a3edea4d32b69fb7410480532a~mv2.jpg'); background-size: cover; background-position: center; }
+    .page-hero-overlay { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(10,28,18,0.78) 0%, rgba(20,45,30,0.88) 100%); }
+    .page-hero-content { position: relative; z-index: 2; padding: 0 2rem; }
+    .page-hero-content h1 { font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 900; color: var(--white); line-height: 1.1; text-shadow: 0 2px 20px rgba(0,0,0,0.4); margin-bottom: 0.75rem; }
+    .page-hero-content p { font-size: clamp(1rem, 2vw, 1.2rem); color: rgba(255,255,255,0.8); font-weight: 300; }
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-tag { display: inline-block; color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .section-title { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--green); line-height: 1.2; margin-bottom: 1rem; }
+    .section-title.light { color: var(--white); }
+    .btn-gold { display: inline-block; background: var(--gold); color: var(--green); padding: 15px 36px; border-radius: 8px; font-weight: 700; font-size: 15px; text-decoration: none; letter-spacing: 0.5px; transition: background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow: 0 4px 20px rgba(201,168,76,0.3); }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.4); }
+    footer { background: #0f2218; color: rgba(255,255,255,0.7); padding: 4rem 2rem 2rem; }
+    .footer-top { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 2rem; }
+    .footer-tagline { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 1.25rem; letter-spacing: 0.5px; }
+    .footer-contact a { display: block; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; margin-bottom: 0.4rem; transition: color 0.2s; }
+    .footer-contact a:hover { color: var(--gold); }
+    .social-links { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .social-link { width: 38px; height: 38px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: background 0.2s, border-color 0.2s; }
+    .social-link:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+    .social-link svg { width: 17px; height: 17px; fill: rgba(255,255,255,0.7); }
+    .footer-links h4 { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+    .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--white); }
+    .footer-bottom { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    .footer-copy { font-size: 12.5px; color: rgba(255,255,255,0.35); }
+    .footer-pgn-badge { font-size: 12px; color: rgba(255,255,255,0.25); letter-spacing: 0.5px; }
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    @media (max-width: 900px) { .footer-top { grid-template-columns: 1fr 1fr; } .footer-top > div:first-child { grid-column: 1 / -1; } }
+    @media (max-width: 640px) { .nav-links { display: none; } .hamburger { display: flex; } .footer-top { grid-template-columns: 1fr; gap: 2rem; } section { padding: 3.5rem 1.25rem; } }
+"""
+
+NAVBAR_HTML = """  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-monogram">PGN</div>
+      <div class="nav-brand">Perth Golf Network<span>Western Australia</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="about-us.html">About</a></li>
+      <li><a href="daily-competitions.html">Daily Comps</a></li>
+      <li><a href="special-events.html">Special Events</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="gift-card.html">Gift Card</a></li>
+      <li class="nav-dropdown">
+        <a href="#" class="nav-dropdown-toggle">More</a>
+        <ul class="nav-dropdown-menu">
+          <li><a href="contact-us.html">Contact Us</a></li>
+          <li><a href="sponsors.html">Sponsors</a></li>
+          <li><a href="sponsors-offers.html">Sponsor Offers</a></li>
+          <li><a href="south-west-league.html">South West League</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="honour-board.html">Honour Board</a></li>
+        </ul>
+      </li>
+      <li><a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a></li>
+      <li><a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" class="nav-cta" target="_blank" rel="noopener">Join Now</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about-us.html">About</a>
+    <a href="daily-competitions.html">Daily Comps</a>
+    <a href="special-events.html">Special Events</a>
+    <a href="shop.html">Shop</a>
+    <a href="gift-card.html">Gift Card</a>
+    <a href="contact-us.html">Contact Us</a>
+    <a href="sponsors.html">Sponsors</a>
+    <a href="sponsors-offers.html">Sponsor Offers</a>
+    <a href="south-west-league.html">South West League</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="honour-board.html">Honour Board</a>
+    <a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a>
+    <a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" class="mob-cta" target="_blank" rel="noopener">Join Now</a>
+  </div>"""
+
+FOOTER_HTML = """  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="display:inline-flex;margin-bottom:1rem;">
+          <div class="nav-monogram">PGN</div>
+          <div class="nav-brand" style="font-size:1.1rem;">Perth Golf Network</div>
+        </a>
+        <p class="footer-tagline">WA's Biggest &amp; Best Social Golf Club</p>
+        <div class="footer-contact">
+          <a href="mailto:info@perthgolfnetwork.com.au">info@perthgolfnetwork.com.au</a>
+          <a href="tel:0862855822">(08) 6285 5822</a>
+        </div>
+        <div class="social-links">
+          <a href="https://www.facebook.com/perthgolfnetwork" class="social-link" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/perthgolfnetwork" class="social-link" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="about-us.html">About Us</a></li>
+          <li><a href="daily-competitions.html">Daily Comps</a></li>
+          <li><a href="special-events.html">Special Events</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="gift-card.html">Gift Card</a></li>
+          <li><a href="contact-us.html">Contact Us</a></li>
+          <li><a href="sponsors.html">Sponsors</a></li>
+          <li><a href="south-west-league.html">South West League</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="honour-board.html">Honour Board</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Members</h4>
+        <ul>
+          <li><a href="https://perthgolfnetwork.miclub.com.au" target="_blank" rel="noopener">Members Area</a></li>
+          <li><a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" target="_blank" rel="noopener">Join Now</a></li>
+          <li><a href="https://perthgolfnetwork.miclub.com.au/views/members/booking/eventList.xhtml?" target="_blank" rel="noopener">Book a Comp</a></li>
+          <li><a href="http://eepurl.com/iQC68M" target="_blank" rel="noopener">Newsletter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">&copy; 2026 Perth Golf Network. All rights reserved.</p>
+      <p class="footer-pgn-badge">WA's #1 Social Golf Club</p>
+    </div>
+  </footer>"""
+
+JS_HTML = """  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 60); });
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => { hamburger.classList.remove('open'); mobileMenu.classList.remove('open'); document.body.style.overflow = ''; });
+    });
+    document.querySelectorAll('.fade-in').forEach(el => {
+      new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+      }, { threshold: 0.15 }).observe(el);
+    });
+  </script>"""
+
+def page(title, desc, head_extra_css, body_content):
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content="{desc}" />
+  {FONTS}
+  <style>{BASE_CSS}{head_extra_css}</style>
+</head>
+<body>
+{NAVBAR_HTML}
+{body_content}
+{FOOTER_HTML}
+{JS_HTML}
+</body>
+</html>"""
+
+# ─── sponsors-offers.html ──────────────────────────────────────────────────────
+offers = [
+    ("Drummond Golf", "Receive a Drummond Club Membership valued at $39.95"),
+    ("Rocky Ridge Brewery", "Receive 10% off any online orders over $100 + Free Delivery"),
+    ("Carco.com.au", "VIP Exclusive Experience when buying or selling + Get any make or model service!"),
+    ("Hillside Buggies", "Receive 10% off buggies, accessories and repairs"),
+    ("YHB Group", "Need a home builder you can trust? Quality built homes and service you can rely on"),
+    ("Macias Consulting", "Referral Bonus: Receive $1,000 credit &amp; your membership covered for a successful referral"),
+    ("Refer a Friend", "Why not refer a friend? Get a $25 members credit per referral"),
+    ("Loan WA", "Settle a loan with Loan WA: Receive up to $250 in PGN credit + your PGN membership covered"),
+    ("Furnace + Assay", "Fire assay equipment across manufacturing, servicing and administration"),
+    ("QMS", "Outdoor digital signage solutions for all types of business"),
+]
+offers_cards = "\n".join([f"""        <div class="offer-card fade-in">
+          <h3>{name}</h3>
+          <p>{desc}</p>
+          <a href="#" class="offer-btn">Click Here</a>
+        </div>""" for name, desc in offers])
+
+sponsors_offers_html = page(
+    "Sponsor Offers — Perth Golf Network",
+    "Exclusive offers for PGN members from our sponsors including Drummond Golf, Rocky Ridge Brewery, Carco and more.",
+    """
+    .offers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+    .offer-card { background: var(--green); border: 2px solid rgba(201,168,76,0.35); border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+    .offer-card h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--gold); }
+    .offer-card p { font-size: 15px; color: rgba(255,255,255,0.82); line-height: 1.6; flex: 1; }
+    .offer-btn { display: inline-block; background: var(--gold); color: var(--green); padding: 10px 28px; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none; letter-spacing: 0.5px; text-transform: uppercase; transition: background 0.2s; align-self: flex-start; }
+    .offer-btn:hover { background: var(--gold-light); }
+    """,
+    f"""  <div class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <h1>PGN SPONSOR OFFERS</h1>
+      <p>Exclusive deals for Perth Golf Network members</p>
+    </div>
+  </div>
+  <section>
+    <div class="container">
+      <span class="section-tag">Member Benefits</span>
+      <h2 class="section-title">Exclusive Member Offers</h2>
+      <p style="color:var(--text-light);font-size:16px;margin-bottom:0.5rem;">As a PGN member you get access to exclusive offers from our valued sponsors. Click through to claim your deal.</p>
+      <div class="offers-grid">
+{offers_cards}
+      </div>
+    </div>
+  </section>"""
+)
+
+# ─── south-west-league.html ────────────────────────────────────────────────────
+swl_html = page(
+    "South West League — Perth Golf Network",
+    "PGN South West League — competitive golf in the South West WA. Competitions at Sanctuary Resort, Bunbury and more. $199 for 12 months.",
+    """
+    .swl-intro { background: var(--white); }
+    .swl-perks { background: var(--off-white); }
+    .perks-list { list-style: none; display: flex; flex-direction: column; gap: 0.85rem; margin: 1.5rem 0; }
+    .perks-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 15.5px; color: var(--text); line-height: 1.6; padding: 0.75rem 1rem; background: var(--white); border-radius: 10px; border-left: 4px solid var(--gold); }
+    .perks-list li::before { content: '✓'; font-size: 14px; font-weight: 700; color: var(--gold); min-width: 18px; margin-top: 1px; }
+    .price-box { background: var(--gold); border-radius: 16px; padding: 2.5rem; text-align: center; margin: 2rem 0; }
+    .price-box h3 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--green); margin-bottom: 0.5rem; }
+    .price-box p { font-size: 15px; color: rgba(26,58,42,0.75); }
+    .swl-dark { background: var(--green); }
+    .swl-dark p { color: rgba(255,255,255,0.82); font-size: 16px; line-height: 1.75; }
+    .note-box { background: rgba(255,255,255,0.08); border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; padding: 1.25rem 1.5rem; margin-top: 1.5rem; font-size: 14px; color: rgba(255,255,255,0.65); }
+    .sponsors-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; }
+    .sponsor-pill { background: rgba(255,255,255,0.08); border: 1px solid rgba(201,168,76,0.3); border-radius: 100px; padding: 9px 22px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.8); }
+    """,
+    """  <div class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <h1>PGN SOUTH WEST LEAGUE</h1>
+      <p>Competitive social golf in the South West</p>
+    </div>
+  </div>
+
+  <section class="swl-intro">
+    <div class="container">
+      <span class="section-tag">South West League</span>
+      <h2 class="section-title">Golf Down South</h2>
+      <p style="font-size:17px;color:var(--text-light);line-height:1.75;margin-bottom:1.5rem;">The Perth Golf Network 'South West League' aims to provide competition golf in a relaxed, friendly atmosphere across a variety of courses in the South West. PGN are now offering memberships and regular competitions in our brand new South West League.</p>
+      <p style="font-size:17px;color:var(--text-light);line-height:1.75;">We are WA's largest social golf club, providing competitive golf for thousands of people across Perth and now down south. South West League members get all the perks of being a PGN member + access to competitions at Sanctuary Resort on Fridays and Bunbury on Sundays.</p>
+    </div>
+  </section>
+
+  <section class="swl-perks">
+    <div class="container">
+      <span class="section-tag">Membership Benefits</span>
+      <h2 class="section-title">As a South West League member you'll be part of something bigger…</h2>
+      <ul class="perks-list fade-in">
+        <li>Access to 1,000+ competitions per year across Perth and the South West</li>
+        <li>35 competitions per week to choose from inc. Bunbury, Sanctuary Resort, Joondalup, Meadow Springs, Rockingham, Kwinana, The Vines, Collier Park, Wembley &amp; many more</li>
+        <li>PGN members played 49,104 rounds last year</li>
+        <li>$250,000+ prize money returned to members in the last financial year</li>
+        <li>Huge special events, series events, pennants, match play champs, club champs, order of merit &amp; tours</li>
+        <li>Get an official Golf Australia Handicap &amp; heaps of goodies in the members pack</li>
+        <li>Be a part of a great bunch of easy going members</li>
+      </ul>
+      <div class="price-box">
+        <h3>PGN SWL Membership — $199</h3>
+        <p>12 months (Save $125)</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="https://perthgolfnetwork.miclub.com.au/cms/membership-application/" class="btn-gold" target="_blank" rel="noopener">JOIN NOW — SOUTH WEST LEAGUE</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="swl-dark">
+    <div class="container">
+      <span class="section-tag" style="color:var(--gold);">Foundation Partners</span>
+      <h2 class="section-title light">Special Thanks</h2>
+      <p>Special thanks to our foundation partners — Drummond Golf, Rocky Ridge Brewery, Hillside Buggies &amp; Triple M South West.</p>
+      <div class="note-box">
+        <strong style="color:rgba(255,255,255,0.9);">Please note:</strong> You must live in the following postcodes to qualify for the South West League Membership: <strong style="color:var(--gold);">6215–6290</strong> with proof of address required on application. All other WA postcodes fall into the standard PGN membership category.
+      </div>
+      <p style="margin-top:1.5rem;">Join WA's friendliest golf club today with memberships that are flexible, affordable and fun. Help us shape an awesome community of golfers in the south west.</p>
+      <div class="sponsors-row">
+        <span class="sponsor-pill">Drummond Golf</span>
+        <span class="sponsor-pill">Rocky Ridge Brewery</span>
+        <span class="sponsor-pill">Hillside Buggies</span>
+        <span class="sponsor-pill">Triple M South West</span>
+      </div>
+    </div>
+  </section>"""
+)
+
+# ─── gallery.html ──────────────────────────────────────────────────────────────
+photos = [
+    "b4d0d3_eff759db8ce34bf48395529f8a288a73~mv2.jpg",
+    "b4d0d3_62cd4e21dcc24cffa16558d6cd37abff~mv2.jpg",
+    "b4d0d3_962e217540ca4fb1b62ec11ae4dfc15e~mv2.jpg",
+    "b4d0d3_2ccb6347fa9245c4976c79f5b47b000f~mv2.jpg",
+    "b4d0d3_eae0c85e0dfd4882911172c10d911430~mv2.jpg",
+    "b4d0d3_30887e52e3134b879d1d4a92a235bd48~mv2.jpg",
+    "b4d0d3_0fa7c0a3edea4d32b69fb7410480532a~mv2.jpg",
+    "b4d0d3_a487e6f257a7483d9bdb4338c99e5313~mv2.jpg",
+]
+gallery_imgs = "\n".join([f'        <div class="gallery-item fade-in"><img src="https://static.wixstatic.com/media/{p}/v1/fill/w_600,h_400,q_85/{p}" alt="Perth Golf Network" loading="lazy" /></div>' for p in photos])
+
+gallery_html = page(
+    "Gallery — Perth Golf Network",
+    "Photos from Perth Golf Network competitions, special events and courses across WA.",
+    """
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .gallery-item { border-radius: 12px; overflow: hidden; aspect-ratio: 3/2; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; display: block; }
+    .gallery-item:hover img { transform: scale(1.04); }
+    """,
+    f"""  <div class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <h1>GALLERY</h1>
+      <p>Perth Golf Network — out on the course</p>
+    </div>
+  </div>
+  <section>
+    <div class="container">
+      <span class="section-tag">Photos</span>
+      <h2 class="section-title">Perth Golf Network in Action</h2>
+      <div class="gallery-grid">
+{gallery_imgs}
+      </div>
+    </div>
+  </section>"""
+)
+
+# ─── honour-board.html ─────────────────────────────────────────────────────────
+honour_html = page(
+    "Honour Board — Perth Golf Network",
+    "Perth Golf Network Hole in One Honour Board, Club Champions and Order of Merit winners.",
+    """
+    .hb-table-wrap { overflow-x: auto; margin-top: 2rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { background: var(--green); color: var(--gold); }
+    thead th { padding: 14px 16px; text-align: left; font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: 0.5px; font-size: 12px; text-transform: uppercase; }
+    tbody tr:nth-child(even) { background: var(--off-white); }
+    tbody tr:hover { background: rgba(201,168,76,0.08); }
+    tbody td { padding: 12px 16px; color: var(--text); border-bottom: 1px solid var(--grey); }
+    .hb-section { background: var(--white); }
+    .hb-section + .hb-section { background: var(--off-white); }
+    .note { font-size: 14px; color: var(--grey-mid); margin-top: 1.5rem; font-style: italic; }
+    """,
+    """  <div class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <h1>PGN HONOUR BOARDS</h1>
+      <p>Celebrating our members' achievements</p>
+    </div>
+  </div>
+
+  <section class="hb-section">
+    <div class="container">
+      <span class="section-tag">Hall of Fame</span>
+      <h2 class="section-title">PGN Hole in One Honour Board</h2>
+      <div class="hb-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Player</th>
+              <th>Course</th>
+              <th>Hole</th>
+              <th>Distance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>—</td><td colspan="4" style="color:var(--grey-mid);font-style:italic;">Full honour board data to be provided by PGN administration.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Contact info@perthgolfnetwork.com.au to submit a hole in one for the honour board.</p>
+    </div>
+  </section>
+
+  <section class="hb-section" style="background:var(--off-white);">
+    <div class="container">
+      <span class="section-tag">Annual Champions</span>
+      <h2 class="section-title">Club Champions</h2>
+      <div class="hb-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Champion</th>
+              <th>Category</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>—</td><td colspan="3" style="color:var(--grey-mid);font-style:italic;">Club champion data to be provided by PGN administration.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="hb-section">
+    <div class="container">
+      <span class="section-tag">Season Rankings</span>
+      <h2 class="section-title">Order of Merit</h2>
+      <div class="hb-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Points</th>
+              <th>Season</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>—</td><td colspan="3" style="color:var(--grey-mid);font-style:italic;">Order of merit data to be provided by PGN administration.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>"""
+)
+
+# ─── Write new pages ───────────────────────────────────────────────────────────
+pages = {
+    "sponsors-offers.html": sponsors_offers_html,
+    "south-west-league.html": swl_html,
+    "gallery.html": gallery_html,
+    "honour-board.html": honour_html,
+}
+
+for fname, content in pages.items():
+    path = os.path.join(DIR, fname)
+    with open(path, "w") as f:
+        f.write(content)
+    print(f"Written: {fname} ({len(content)} chars)")
+
+# ─── Update navs in existing pages ─────────────────────────────────────────────
+# The 5 pages that don't have the More dropdown yet
+UPDATE_PAGES = ["index.html", "daily-competitions.html", "special-events.html", "shop.html", "gift-card.html"]
+
+MORE_DROPDOWN = """      <li class="nav-dropdown">
+        <a href="#" class="nav-dropdown-toggle">More</a>
+        <ul class="nav-dropdown-menu">
+          <li><a href="contact-us.html">Contact Us</a></li>
+          <li><a href="sponsors.html">Sponsors</a></li>
+          <li><a href="sponsors-offers.html">Sponsor Offers</a></li>
+          <li><a href="south-west-league.html">South West League</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="honour-board.html">Honour Board</a></li>
+        </ul>
+      </li>"""
+
+MOBILE_EXTRA = """    <a href="contact-us.html">Contact Us</a>
+    <a href="sponsors.html">Sponsors</a>
+    <a href="sponsors-offers.html">Sponsor Offers</a>
+    <a href="south-west-league.html">South West League</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="honour-board.html">Honour Board</a>"""
+
+# Nav dropdown CSS to inject if missing
+DROPDOWN_CSS = """    .nav-dropdown { position: relative; }
+    .nav-dropdown-toggle { display: flex !important; align-items: center; gap: 5px; cursor: pointer; }
+    .nav-dropdown-toggle::after { content: '▾'; font-size: 10px; }
+    .nav-dropdown-menu { position: absolute; top: calc(100% + 12px); right: 0; background: rgba(20,50,35,0.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(201,168,76,0.25); border-radius: 10px; min-width: 210px; list-style: none; padding: 0.5rem 0; opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; z-index: 200; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown:focus-within .nav-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+    .nav-dropdown-menu li { padding: 0; }
+    .nav-dropdown-menu a { display: block !important; padding: 9px 18px !important; font-size: 13px !important; color: rgba(255,255,255,0.82) !important; letter-spacing: 0.2px !important; border-bottom: 1px solid rgba(255,255,255,0.04) !important; transition: background 0.15s, color 0.15s !important; }
+    .nav-dropdown-menu li:last-child a { border-bottom: none !important; }
+    .nav-dropdown-menu a:hover { background: rgba(201,168,76,0.12) !important; color: var(--gold) !important; }"""
+
+for fname in UPDATE_PAGES:
+    path = os.path.join(DIR, fname)
+    with open(path, "r") as f:
+        html = f.read()
+
+    # Skip if already has More dropdown
+    if "nav-dropdown" in html:
+        print(f"Skipped (already has dropdown): {fname}")
+        continue
+
+    # Add dropdown CSS before </style>
+    html = html.replace("</style>", DROPDOWN_CSS + "\n  </style>", 1)
+
+    # Add More dropdown before Members Area link in nav-links
+    html = re.sub(
+        r'(<li><a href="https://perthgolfnetwork\.miclub\.com\.au" target="_blank"[^>]*>Members Area</a></li>)',
+        MORE_DROPDOWN + "\n      \\1",
+        html
+    )
+
+    # Add mobile links after last mob-nav-link before mob-cta
+    html = re.sub(
+        r'(<a href="https://perthgolfnetwork\.miclub\.com\.au" [^>]*class="mob-nav-link"[^>]*>Members Area</a>)',
+        MOBILE_EXTRA + "\n    \\1",
+        html
+    )
+
+    with open(path, "w") as f:
+        f.write(html)
+    print(f"Updated nav: {fname}")
+
+print("Done.")
